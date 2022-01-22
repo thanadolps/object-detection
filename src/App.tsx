@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, Container, FormControlLabel, Input, Slider, Stack, Switch, Toolbar, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, Container, FormControlLabel, Input, Slider, Stack, Switch, TextField, Toolbar, Typography } from '@mui/material';
 import Webcam from 'react-webcam';
 import cv, { Mat, Rect } from "opencv-ts";
 import { CovarFlags } from 'opencv-ts/src/core/Core';
@@ -33,6 +33,9 @@ function App() {
   const [width, setWidth] = useState(500);
   const [height, setHeight] = useState(500);
 
+  const [captureInterval, setCaptureInterval] = useState(1000);
+  const [autoCapture, setAutoCapture] = useState(false);
+
   const capture = async () => {
     const webcam = webcamRef.current;
     if (webcam === null) {
@@ -41,7 +44,6 @@ function App() {
     }
 
     const img = webcam.getScreenshot({ width: width, height: height });
-    console.log(`img = ${img}`);
     setDisplayImage(img);
   }
 
@@ -49,6 +51,14 @@ function App() {
     const img = await readBase64(file);
     setDisplayImage(img);
   }
+
+  useEffect(() => {
+    let captureTask: number | undefined;
+    if (autoCapture && webcamEnable) {
+      captureTask = window.setInterval(capture, captureInterval);
+    }
+    return () => window.clearInterval(captureTask);
+  }, [autoCapture, webcamEnable, captureInterval]);
 
   return (
     <Stack direction="column" spacing={2}>
@@ -83,7 +93,17 @@ function App() {
         </>
       )}
 
-      <Button variant="contained" onClick={capture}>capture</Button>
+      <Stack direction="row" spacing={2}>
+        <Button variant="contained" onClick={capture} disabled={!webcamEnable}>capture</Button>
+        <FormControlLabel control={
+          <Switch value={autoCapture} onChange={() => setAutoCapture(x => !x)}></Switch>
+        } label="Autocapture" disabled={!webcamEnable} />
+        {autoCapture && <FormControlLabel control={
+          <Slider value={captureInterval} min={33} max={1500}
+            onChange={(_, val) => setCaptureInterval(val as number)} valueLabelDisplay='on'></Slider>
+        } label="Capture interval" />
+        }
+      </Stack>
       <label>
         <input accept="image/*" type="file" hidden onChange={(ev) => handleUpload(ev.currentTarget.files![0])} />
         <Button variant="contained" component="span">Upload</Button>
@@ -166,6 +186,7 @@ function CV(props: { img: string }) {
     </AccordionSummary>
     <canvas ref={canvasDetectRef}></canvas>
 
+
     <Slider
       value={threshould}
       min={0}
@@ -173,6 +194,8 @@ function CV(props: { img: string }) {
       valueLabelDisplay='on'
       onChange={(_, val) => setThreshould(val as number)}>
     </Slider>
+
+
   </div >;
 
 }
