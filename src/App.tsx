@@ -64,7 +64,7 @@ function App() {
     <Stack direction="column" spacing={2}>
       <AppBar position='sticky'>
         <Toolbar>
-          <Typography variant='h6' sx={{ flexGrow: 1 }}>Cloth scan</Typography>
+          <Typography variant='h6' sx={{ flexGrow: 1 }}>Scan</Typography>
 
           <FormControlLabel
             control={<Switch color='secondary' checked={webcamEnable} onChange={() => setWebcamEnable(!webcamEnable)} />}
