@@ -168,7 +168,12 @@ function CV(props: { img: string }) {
   }, [props.img, threshould]);
 
   return <div>
-    <img width={500} height={500} ref={imageRef} src={props.img}></img>
+    <Accordion>
+      <AccordionSummary>
+        <Typography>Original</Typography>
+      </AccordionSummary>
+      <img width={500} height={500} ref={imageRef} src={props.img}></img>
+    </Accordion>
     <Accordion>
       <AccordionSummary>
         <Typography>Gray</Typography>
